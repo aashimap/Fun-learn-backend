@@ -1,6 +1,16 @@
 const express = require("express"),
   userRoutes = require("./routes/user"),
-  app = express();
+  cors = require("cors");
+app = express();
+
+app.use(cors());
+
+const corsOptions = {
+  origin: "http://localhost:3000",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 require("dotenv").config();
 

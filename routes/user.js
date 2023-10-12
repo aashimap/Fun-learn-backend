@@ -3,9 +3,9 @@ const express = require("express"),
   verifyToken = require("../middlewares/authJWT"),
   { signup, signin } = require("../controllers/controller.js");
 
-router.post("/register", signup, function (req, res) {});
+router.post("/signup", signup, function (req, res) {});
 
-router.post("/login", signin, function (req, res) {});
+router.post("/signin", signin, function (req, res) {});
 
 router.get("/hiddencontent", verifyToken, function (req, res) {
   if (!req.user) {
