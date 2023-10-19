@@ -1,10 +1,15 @@
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcrypt");
 var User = require("../models/user");
+const multiparty = require("multiparty");
+const cloudinary = require("../utils/cloudinary");
 
-//saving a new user
+const Activity = require("../models/activity");
+
+//signup
 
 exports.signup = async (req, res) => {
+  console.log(req.body);
   try {
     let existingUser = await User.where({ email: req.body.email }).fetchAll();
 
@@ -25,9 +30,18 @@ exports.signup = async (req, res) => {
 
     await newUser.save();
 
+    const accessToken = jwt.sign(
+      { id: newUser.id, role: newUser.get("role") },
+      process.env.API_SECRET,
+      { expiresIn: 86400 }
+    );
+
+    res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });
+
     return res.status(200).send({
       message: "User registered successfully",
       user: newUser.toJSON(),
+      accessToken: accessToken,
     });
   } catch (error) {
     console.error("Error during signup:", error);
@@ -39,13 +53,11 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
   try {
-    console.log(req.body);
     let user = await User.where({
       email: req.body.email,
     }).fetch({ require: false });
 
     if (!user) {
-      console.log("USER NOT FOUND");
       return res.status(404).json({
         status: false,
         message: "User not found",
@@ -56,40 +68,103 @@ exports.signin = async (req, res) => {
       req.body.password,
       user.get("password")
     );
+
     if (!validPassword) {
-      console.log("INVALID PASSWORD");
       return res.status(401).json({
         status: false,
         message: "Invalid Password!",
       });
     }
 
-    //signing token with user id
-    var token = jwt.sign(
-      {
-        id: user.id,
-      },
+    // Sign a token with user id and role
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.get("role") },
       process.env.API_SECRET,
-      {
-        expiresIn: 86400,
-      }
+      { expiresIn: 86400 }
     );
+
+    res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });
+
+    // Check if the user is an admin
+    const isAdmin = user.get("role") === "admin";
 
     res.status(200).send({
       user: {
         id: user.get("id"),
         email: user.get("email"),
         fullName: user.get("fullName"),
+        role: user.get("role"),
       },
-      message: "Login successfull",
-      accessToken: token,
+      message: "Login successful",
+      accessToken: accessToken,
+      isAdmin: isAdmin,
     });
   } catch (error) {
-    console.error("Error during sign-in:", error);
-    res.status(500).json({
-      error: {
-        message: "Internal server error",
-      },
+    console.log("Error signing in:", error);
+    res.status(500).json(error.message);
+  }
+};
+
+exports.addActivity = (req, res) => {
+  const form = new multiparty.Form();
+  form.parse(req, async (err, fields, files) => {
+    try {
+      const image = files.image[0].path;
+      const { name } = fields;
+
+      const result = await cloudinary.uploader.upload(image, {
+        folder: "activities_images",
+      });
+
+      if (!result || !result.secure_url) {
+        throw new Error("Error uploading image to Cloudinary");
+      }
+
+      if (req.role !== "admin") {
+        return res.status(403).json({
+          status: false,
+          message: "Permission denied. User is not an admin",
+        });
+      }
+
+      const existingActivity = await Activity.where({ name: name }).fetchAll();
+
+      if (existingActivity.length > 0) {
+        return res.status(400).json({
+          status: false,
+          message: "Activity already exists",
+        });
+      }
+
+      const newActivity = new Activity({
+        name,
+        image: result.secure_url,
+      });
+
+      await newActivity.save();
+
+      return res.status(200).json({
+        status: true,
+        message: "Activity added to database successfully",
+        activity: newActivity.toJSON(),
+      });
+    } catch (error) {
+      console.error("Error adding activity to database:", error);
+      res.status(500).json({ message: "Error adding activity to database" });
+    }
+  });
+};
+
+exports.fetchActivity = async (req, res) => {
+  try {
+    const activities = await Activity.fetchAll();
+    console.log(activities.toJSON());
+    res.status(200).json({
+      status: true,
+      activities: activities.toJSON(),
     });
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    res.status(500).json({ message: "Error fetching activities" });
   }
 };

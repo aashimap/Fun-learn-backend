@@ -1,26 +1,25 @@
-const express = require("express"),
-  router = express.Router(),
-  verifyToken = require("../middlewares/authJWT"),
-  { signup, signin } = require("../controllers/controller.js");
+const express = require("express");
+const router = express.Router();
+const verifyToken = require("../middlewares/authJWT");
+const {
+  signup,
+  signin,
+  addActivity,
+  fetchActivity,
+} = require("../controllers/controller.js");
+const cookieParser = require("cookie-parser");
 
-router.post("/signup", signup, function (req, res) {});
+//const authAdmin = require("../middlewares/authAdmin");
+//const multer = require("multer");
+//const storage = multer.memoryStorage();
+//const upload = multer({ storage: storage });
 
-router.post("/signin", signin, function (req, res) {});
+router.post("/signup", signup, cookieParser(), function (req, res) {});
 
-router.get("/hiddencontent", verifyToken, function (req, res) {
-  if (!req.user) {
-    res.status(403).send({
-      message: "Invalid JWT token",
-    });
-  } else if (req.user.get("role") === "normal") {
-    res.status(200).send({
-      message: "Congratulations! but there is no hidden content",
-    });
-  } else {
-    res.status(403).send({
-      message: "Unauthorized access",
-    });
-  }
-});
+router.post("/signin", signin, cookieParser(), function (req, res) {});
+
+router.post("/activities/add", verifyToken, addActivity);
+
+router.get("/activities/fetch", verifyToken, fetchActivity);
 
 module.exports = router;

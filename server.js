@@ -2,15 +2,16 @@ const express = require("express"),
   userRoutes = require("./routes/user"),
   cors = require("cors");
 app = express();
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
-app.use(cors());
-
-const corsOptions = {
-  origin: "http://localhost:3000",
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+  })
+);
 
 require("dotenv").config();
 
