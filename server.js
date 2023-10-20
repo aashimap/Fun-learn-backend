@@ -7,7 +7,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "https://main--voluble-granita-11687f.netlify.app",
+    origin: "https://fun-learn-app.netlify.app",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
