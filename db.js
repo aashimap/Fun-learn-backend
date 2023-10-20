@@ -1,10 +1,12 @@
+require("dotenv").config();
+
 const knex = require("knex")({
   client: "mysql2",
   connection: {
-    host: "localhost",
-    user: "root",
-    password: "Password@1234",
-    database: "training",
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
     charset: "utf8",
   },
 });
