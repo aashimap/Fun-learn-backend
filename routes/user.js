@@ -6,6 +6,7 @@ const {
   signin,
   addActivity,
   fetchActivity,
+  deleteActivity,
 } = require("../controllers/controller.js");
 const cookieParser = require("cookie-parser");
 
@@ -19,6 +20,8 @@ router.post("/signup", signup, cookieParser(), function (req, res) {});
 router.post("/signin", signin, cookieParser(), function (req, res) {});
 
 router.post("/activities/add", verifyToken, addActivity);
+
+router.delete("/activities/delete/:id", verifyToken, deleteActivity);
 
 router.get("/activities/fetch", verifyToken, fetchActivity);
 
