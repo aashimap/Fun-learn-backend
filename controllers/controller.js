@@ -155,6 +155,38 @@ exports.addActivity = (req, res) => {
   });
 };
 
+exports.deleteActivity = async (req, res) => {
+  try {
+    if (req.role !== "admin") {
+      return res.status(403).json({
+        status: false,
+        message: "Permission denied. User is not an admin",
+      });
+    }
+
+    const activityId = req.params.id;
+
+    const activity = await Activity.where({ id: activityId }).fetch();
+
+    if (!activity) {
+      return res.status(404).json({
+        status: false,
+        message: "Activity not found",
+      });
+    }
+
+    await activity.destroy();
+
+    return res.status(200).json({
+      status: true,
+      message: "Activity deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting activity:", error);
+    res.status(500).json({ message: "Error deleting activity" });
+  }
+};
+
 exports.fetchActivity = async (req, res) => {
   try {
     const activities = await Activity.fetchAll();
