@@ -21,7 +21,7 @@ router.post("/signin", signin, cookieParser(), function (req, res) {});
 
 router.post("/activities/add", verifyToken, addActivity);
 
-router.delete("/activities/delete/:id", verifyToken, deleteActivity);
+router.delete("/activities/delete", verifyToken, deleteActivity);
 
 router.get("/activities/fetch", verifyToken, fetchActivity);
 

@@ -33,15 +33,19 @@ exports.signup = async (req, res) => {
     const accessToken = jwt.sign(
       { id: newUser.id, role: newUser.get("role") },
       process.env.API_SECRET,
-      { expiresIn: 86400 }
+      { expiresIn: 1000 }
     );
 
     res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });
 
-    return res.status(200).send({
+    const isAdmin = newUser.get("role") === "admin";
+    console.log(newUser.toJSON());
+
+    return res.status(200).json({
       message: "User registered successfully",
       user: newUser.toJSON(),
       accessToken: accessToken,
+      isAdmin: isAdmin,
     });
   } catch (error) {
     console.error("Error during signup:", error);
@@ -80,7 +84,7 @@ exports.signin = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user.id, role: user.get("role") },
       process.env.API_SECRET,
-      { expiresIn: 86400 }
+      { expiresIn: 1000 }
     );
 
     res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });
@@ -117,7 +121,7 @@ exports.addActivity = (req, res) => {
       });
 
       if (!result || !result.secure_url) {
-        throw new Error("Error uploading image to Cloudinary");
+        throw new Error("Error uploading image");
       }
 
       if (req.role !== "admin") {
@@ -145,17 +149,18 @@ exports.addActivity = (req, res) => {
 
       return res.status(200).json({
         status: true,
-        message: "Activity added to database successfully",
+        message: "Activity added successfully",
         activity: newActivity.toJSON(),
       });
     } catch (error) {
       console.error("Error adding activity to database:", error);
-      res.status(500).json({ message: "Error adding activity to database" });
+      res.status(500).json({ message: "Error adding activity" });
     }
   });
 };
 
 exports.deleteActivity = async (req, res) => {
+  console.log(req.body);
   try {
     if (req.role !== "admin") {
       return res.status(403).json({
@@ -164,9 +169,9 @@ exports.deleteActivity = async (req, res) => {
       });
     }
 
-    const activityId = req.params.id;
+    const { name: activityName } = req.body;
 
-    const activity = await Activity.where({ id: activityId }).fetch();
+    const activity = await Activity.where({ name: activityName }).fetch();
 
     if (!activity) {
       return res.status(404).json({
@@ -190,7 +195,7 @@ exports.deleteActivity = async (req, res) => {
 exports.fetchActivity = async (req, res) => {
   try {
     const activities = await Activity.fetchAll();
-    console.log(activities.toJSON());
+    // console.log(activities.toJSON());
     res.status(200).json({
       status: true,
       activities: activities.toJSON(),
