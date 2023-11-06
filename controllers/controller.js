@@ -57,30 +57,22 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
   try {
-    let user = await User.where({
-      email: req.body.email,
-    }).fetch({ require: false });
+    const { email, password } = req.body;
+
+    const user = await User.where({ email: email }).fetch({ require: false });
 
     if (!user) {
-      return res.status(404).json({
-        status: false,
-        message: "User not found",
-      });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
 
-    let validPassword = bcrypt.compareSync(
-      req.body.password,
-      user.get("password")
-    );
+    const validPassword = bcrypt.compareSync(password, user.get("password"));
 
     if (!validPassword) {
-      return res.status(401).json({
-        status: false,
-        message: "Invalid Password!",
-      });
+      return res
+        .status(401)
+        .json({ status: false, message: "Invalid Password!" });
     }
 
-    // Sign a token with user id and role
     const accessToken = jwt.sign(
       { id: user.id, role: user.get("role") },
       process.env.API_SECRET,
@@ -92,7 +84,7 @@ exports.signin = async (req, res) => {
     // Check if the user is an admin
     const isAdmin = user.get("role") === "admin";
 
-    res.status(200).send({
+    res.status(200).json({
       user: {
         id: user.get("id"),
         email: user.get("email"),
@@ -105,7 +97,7 @@ exports.signin = async (req, res) => {
     });
   } catch (error) {
     console.log("Error signing in:", error);
-    res.status(500).json(error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
