@@ -41,7 +41,10 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:3000" }),
+  passport.authenticate("google", {
+    failureRedirect:
+      "https://fun-learn-app.netlify.app" /*"http://localhost:3000"*/,
+  }),
   async (req, res) => {
     try {
       const user = req.user;
@@ -64,7 +67,9 @@ router.get(
       };
 
       res.redirect(
-        `http://localhost:3000/redirect?data=${JSON.stringify(jsonResponse)}`
+        `https://fun-learn-app.netlify.app/redirect?data=${JSON.stringify(
+          jsonResponse
+        )}`
       );
     } catch (error) {
       console.error("Error during Google authentication:", error);
