@@ -62,7 +62,7 @@ passport.use(
           user = await new User({
             fullName: profile.displayName,
             email: profile.emails[0].value,
-            // Add other fields as needed
+            role: "normal",
           }).save();
         }
 

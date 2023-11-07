@@ -50,7 +50,7 @@ router.get(
       const user = req.user;
       console.log("GOOGLE USER:", user.toJSON());
       const accessToken = jwt.sign(
-        { id: user.id, role: "normal" },
+        { id: user.id, role: user.get("role") },
         process.env.API_SECRET,
         { expiresIn: "1h" }
       );
