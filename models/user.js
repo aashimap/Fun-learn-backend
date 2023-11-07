@@ -26,7 +26,7 @@ const User = bookshelf.model("User", {
 
   password: {
     type: "string",
-    required: false,
+    required: true,
   },
 
   created: {
