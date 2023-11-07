@@ -48,6 +48,7 @@ router.get(
   async (req, res) => {
     try {
       const user = req.user;
+      console.log("GOOGLE USER:", user.toJSON());
       const accessToken = jwt.sign(
         { id: user.id, role: user.get("role") },
         process.env.API_SECRET,
