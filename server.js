@@ -10,8 +10,8 @@ const app = express();
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    //"https://fun-learn-app.netlify.app",
+    //"http://localhost:3000",
+    origin: "https://fun-learn-app.netlify.app",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })

@@ -43,7 +43,7 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     failureRedirect:
-      "https://fun-learn-app.netlify.app" /*"http://localhost:3000"*/,
+      "https://fun-learn-app.netlify.app" /* "http://localhost:3000",*/,
   }),
   async (req, res) => {
     try {
