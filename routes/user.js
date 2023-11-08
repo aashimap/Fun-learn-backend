@@ -67,7 +67,9 @@ router.get(
         isAdmin: isAdmin,
       };
 
-      res.redirect("https://fun-learn-app.netlify.app/redirect");
+      res.redirect(
+        encodeURIComponent("https://fun-learn-app.netlify.app/redirect")
+      );
     } catch (error) {
       console.error("Error during Google authentication:", error);
       res.status(500).json({ message: "Internal server error" });
