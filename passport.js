@@ -52,13 +52,11 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, done) {
       try {
-        // Find the user in the database based on their email
         let user = await User.where({ email: profile.emails[0].value }).fetch({
           require: false,
         });
 
         if (!user) {
-          // If user doesn't exist, create a new user
           user = await new User({
             fullName: profile.displayName,
             email: profile.emails[0].value,
@@ -66,19 +64,13 @@ passport.use(
           }).save();
         }
 
-        // Log the profile for debugging purposes
         console.log("PROFILE:", profile);
-
-        // Serialize user details for the session
-        passport.serializeUser(function (user, done) {
-          done(null, user);
-        });
-
-        // Send user details to the callback function
-        done(null, user);
       } catch (error) {
         console.error("Error during Google authentication:", error);
-        done(error, false);
+        done(null, false, {
+          message: "Error during Google authentication:",
+          error,
+        });
       }
     }
   )

@@ -55,7 +55,7 @@ router.get(
         { expiresIn: "1h" }
       );
       const isAdmin = user.get("role") === "admin";
-      const jsonResponse = {
+      req.expressSession.userData = {
         user: {
           id: user.get("id"),
           email: user.get("email"),
@@ -67,11 +67,7 @@ router.get(
         isAdmin: isAdmin,
       };
 
-      res.redirect(
-        `https://fun-learn-app.netlify.app/redirect?data=${JSON.stringify(
-          jsonResponse
-        )}`
-      );
+      res.redirect("https://fun-learn-app.netlify.app/redirect");
     } catch (error) {
       console.error("Error during Google authentication:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -79,4 +75,8 @@ router.get(
   }
 );
 
+router.get("/googleUser", (req, res) => {
+  const userData = req.expressSession.userData || {};
+  res.json({ userData });
+});
 module.exports = router;
