@@ -33,7 +33,7 @@ exports.signup = async (req, res) => {
     const accessToken = jwt.sign(
       { id: newUser.id, role: newUser.get("role") },
       process.env.API_SECRET,
-      { expiresIn: 1000 }
+      { expiresIn: "1hr" }
     );
 
     res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });
@@ -76,7 +76,7 @@ exports.signin = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user.id, role: user.get("role") },
       process.env.API_SECRET,
-      { expiresIn: 1000 }
+      { expiresIn: "1hr" }
     );
 
     res.cookie("accessToken", accessToken, { httpOnly: true, secure: true });

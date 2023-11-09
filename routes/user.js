@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const verifyToken = require("../middlewares/authJWT");
 const {
   signup,
@@ -42,43 +43,38 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect:
-      "https://fun-learn-app.netlify.app" /* "http://localhost:3000"*/,
+    failureRedirect: "http://localhost:3000", // Specify your failure route
   }),
-  async (req, res) => {
-    try {
-      const user = req.user;
-      console.log("GOOGLE USER:", user.toJSON());
-      const accessToken = jwt.sign(
-        { id: user.id, role: user.get("role") },
-        process.env.API_SECRET,
-        { expiresIn: "1h" }
-      );
-      const isAdmin = user.get("role") === "admin";
-      req.expressSession.userData = {
-        user: {
-          id: user.get("id"),
-          email: user.get("email"),
-          fullName: user.get("fullName"),
-          role: user.get("role"),
-        },
-        message: "Login successful",
-        accessToken: accessToken,
-        isAdmin: isAdmin,
-      };
+  (req, res) => {
+    const user = req.user;
+    console.log("GOOGLE USER:", user);
+    const token = jwt.sign({ user: { user } }, process.env.REDIRECT_SECRET, {
+      expiresIn: "1h",
+    });
 
-      res.redirect(
-        encodeURIComponent("https://fun-learn-app.netlify.app/redirect")
-      );
-    } catch (error) {
-      console.error("Error during Google authentication:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
+    res.redirect(`http://localhost:3000/redirect?token=${token}`);
   }
 );
 
 router.get("/googleUser", (req, res) => {
-  const userData = req.expressSession.userData || {};
-  res.json({ userData });
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "google user token not provided" });
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.REDIRECT_SECRET);
+
+    const user = decodedToken.user.user;
+    console.log("GOOGLE:", user);
+
+    res.json({ user });
+  } catch (error) {
+    console.error("Error decoding token for googleUser:", error);
+    return res.status(401).json({ message: "Invalid googleUser token" });
+  }
 });
+
 module.exports = router;

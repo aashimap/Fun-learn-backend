@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const expressSession = require("express-session");
+const session = require("express-session");
 const passport = require("./passport");
 const userRoutes = require("./routes/user");
 
@@ -10,15 +10,15 @@ const app = express();
 app.use(cookieParser());
 app.use(
   cors({
-    //"http://localhost:3000",
-    origin: "https://fun-learn-app.netlify.app",
+    origin: "http://localhost:3000",
+    //"https://fun-learn-app.netlify.app",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
 );
 
 app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "cross-origin");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
 
@@ -33,12 +33,13 @@ app.use(
 
 // Configure express-session
 app.use(
-  expressSession({
+  session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
   })
 );
+app.set("trust proxy", 1);
 
 // Initialize Passport and restore authentication state, if any, from the session
 app.use(passport.initialize());

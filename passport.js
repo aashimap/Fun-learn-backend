@@ -48,9 +48,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://fun-learn-node.onrender.com/auth/google/callback",
+      callbackURL: "http://localhost:8080/auth/google/callback",
     },
-    async function (accessToken, refreshToken, profile, done) {
+    async function (req, accessToken, refreshToken, profile, done) {
       try {
         let user = await User.where({ email: profile.emails[0].value }).fetch({
           require: false,
@@ -64,11 +64,32 @@ passport.use(
           }).save();
         }
 
-        console.log("PROFILE:", profile);
+        const accessToken = jwt.sign(
+          { id: user.id, role: user.get("role") },
+          process.env.API_SECRET,
+          { expiresIn: "1h" }
+        );
+        const isAdmin = user.get("role") === "admin";
+
+        const userData = {
+          user: {
+            id: user.get("id"),
+            email: user.get("email"),
+            fullName: user.get("fullName"),
+            role: user.get("role"),
+          },
+          message: "Login successful",
+          accessToken: accessToken,
+          isAdmin: isAdmin,
+        };
+
+        req.user = userData;
+
+        done(null, userData);
       } catch (error) {
         console.error("Error during Google authentication:", error);
         done(null, false, {
-          message: "Error during Google authentication:",
+          message: "Error during Google authentication",
           error,
         });
       }
@@ -76,12 +97,16 @@ passport.use(
   )
 );
 
-passport.serializeUser(function (user, done) {
-  done(null, user);
+passport.serializeUser(function (userData, done) {
+  done(null, userData);
 });
 
-passport.deserializeUser(async function (user, done) {
-  done(null, user);
+passport.deserializeUser(async function (userData, done) {
+  try {
+    done(null, userData);
+  } catch (error) {
+    done(error, null);
+  }
 });
 
 module.exports = passport;
