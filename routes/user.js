@@ -43,7 +43,8 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000", // Specify your failure route
+    //failureRedirect: "http://localhost:3000",
+    failureRedirect: "https://fun-learn-app.netlify.app",
   }),
   (req, res) => {
     const user = req.user;
@@ -51,8 +52,8 @@ router.get(
     const token = jwt.sign({ user: { user } }, process.env.REDIRECT_SECRET, {
       expiresIn: "1h",
     });
-
-    res.redirect(`http://localhost:3000/redirect?token=${token}`);
+    //res.redirect(`http://localhost:3000/redirect?token=${token}`);
+    res.redirect(`https://fun-learn-app.netlify.app/redirect?token=${token}`);
   }
 );
 
