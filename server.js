@@ -11,7 +11,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: "https://fun-learn-app.netlify.app",
-    //"http://localhost:3000",
+    //origin: "http://localhost:3000",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })

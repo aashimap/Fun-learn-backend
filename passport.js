@@ -49,6 +49,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "https://fun-learn-node.onrender.com/auth/google/callback",
+      //callbackURL: "http://localhost:8080/auth/google/callback",
     },
     async function (req, accessToken, refreshToken, profile, done) {
       try {
